@@ -36,6 +36,9 @@ fn traite(ligne: String) -> bool {
     } else if ligne2 == ("cat") || ligne2.starts_with("cat ") {
         let ligne3 = ligne2.trim_start_matches("cat");
         command_cat(ligne3.to_string()).expect("TODO: panic message");
+    } else if ligne2 == ("hex") || ligne2.starts_with("hex ") {
+        let ligne3 = ligne2.trim_start_matches("hex");
+        command_hex(ligne3.to_string()).expect("TODO: panic message");
     }
     false
 }
@@ -79,6 +82,48 @@ fn command_cat(mut ligne: String) -> Result<(), Box<dyn std::error::Error>> {
                 println!("{}", buffer);
             }
         }
+    }
+
+    Ok(())
+}
+
+fn command_hex(mut ligne: String) -> Result<(), Box<dyn std::error::Error>> {
+    ligne = ligne.trim().to_string();
+    let f = File::open(ligne)?;
+    let mut reader = BufReader::new(f);
+    let mut pos = 0;
+
+    loop {
+        let mut buffer = [0; 16];
+
+        let n = reader.read(&mut buffer)?;
+
+        if n == 0 {
+            break;
+        }
+
+        print!("{:08X} ", pos);
+
+        let mut s = "".to_string();
+
+        for i in 0..n {
+            print!("{:02X} ", buffer[i]);
+            let c = char::from_u32(buffer[i] as u32).unwrap_or('.');
+            if c.is_ascii_graphic() {
+                s.push(c);
+            } else {
+                s.push('.');
+            }
+        }
+        if n < 16 {
+            for _ in 0..(16 - n) {
+                print!("   ");
+            }
+        }
+        print!(" {}", s);
+        println!();
+
+        pos += n;
     }
 
     Ok(())
