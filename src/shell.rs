@@ -1,0 +1,57 @@
+use std::io::BufRead;
+use std::{fs, io};
+
+pub fn run_shell() {
+    //shell::run();
+    let mut line = "".to_string();
+    loop {
+        line = "".to_string();
+        println!(">");
+        let stdin = io::stdin();
+        let s = stdin.lock().read_line(&mut line);
+        if let Ok(_) = s {
+            //for line in stdin.lock().lines() {
+            /*if line.ends_with('\n') {
+                line = line[0..line.len() - 1].to_string()
+            }*/
+            let len = line.trim_end_matches(&['\r', '\n'][..]).len();
+            line.truncate(len);
+            println!("!{}!", line.clone());
+            let fin = traite(line.clone());
+            if fin {
+                break;
+            }
+            //}
+        }
+    }
+}
+
+fn traite(ligne: String) -> bool {
+    let ligne2 = ligne.trim_end();
+    if ligne2.starts_with("exit") {
+        return true;
+    } else if ligne2 == ("ls") || ligne2.starts_with("ls ") {
+        let ligne3 = ligne2.trim_start_matches("ls");
+        command_ls(ligne3.to_string()).expect("TODO: panic message");
+    }
+    false
+}
+
+fn command_ls(mut ligne: String) -> Result<(), Box<dyn std::error::Error>> {
+    let mut repertoire = ".".to_string();
+    ligne = ligne.trim().to_string();
+    if ligne.len() > 0 {
+        repertoire = ligne.clone();
+    }
+    let mut entries = fs::read_dir(repertoire)?
+        .map(|res| res.map(|e| e.path()))
+        .collect::<Result<Vec<_>, io::Error>>()?;
+
+    entries.sort();
+
+    for entry in entries {
+        println!("{}", entry.display());
+    }
+
+    Ok(())
+}

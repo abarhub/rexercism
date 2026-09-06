@@ -1,3 +1,5 @@
+mod shell;
+
 use std::ops::Add;
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -16,7 +18,8 @@ pub fn reverse(input: &str) -> String {
 fn main() {
     // hello
     //println!("{}", hello_world());
-    println!("{}", reverse("Hello World"));
+    //println!("{}", reverse("Hello World"));
+    shell::run_shell();
 }
 
 #[test]
