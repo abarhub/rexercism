@@ -1,4 +1,5 @@
-use std::io::{stdout, BufRead, Write};
+use std::fs::File;
+use std::io::{BufRead, BufReader, Read, Write, stdout};
 use std::{fs, io};
 
 pub fn run_shell() {
@@ -32,6 +33,9 @@ fn traite(ligne: String) -> bool {
     } else if ligne2 == ("echo") || ligne2.starts_with("echo ") {
         let ligne3 = ligne2.trim_start_matches("echo");
         command_echo(ligne3.to_string());
+    } else if ligne2 == ("cat") || ligne2.starts_with("cat ") {
+        let ligne3 = ligne2.trim_start_matches("cat");
+        command_cat(ligne3.to_string()).expect("TODO: panic message");
     }
     false
 }
@@ -58,4 +62,24 @@ fn command_ls(mut ligne: String) -> Result<(), Box<dyn std::error::Error>> {
 fn command_echo(mut ligne: String) {
     ligne = ligne.trim().to_string();
     println!("{}", ligne);
+}
+
+fn command_cat(mut ligne: String) -> Result<(), Box<dyn std::error::Error>> {
+    ligne = ligne.trim().to_string();
+
+    if ligne.len() > 0 {
+        let f = File::open(ligne)?;
+        let mut reader = BufReader::new(f);
+        loop {
+            let mut buffer = String::new();
+            let res = reader.read_line(&mut buffer)?;
+            if res == 0 {
+                break;
+            } else {
+                println!("{}", buffer);
+            }
+        }
+    }
+
+    Ok(())
 }
